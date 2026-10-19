@@ -11,7 +11,6 @@ import enums.*;
  *  - CHANGED: markReturned() now records dateReturned and returns false if the status did not become RETURNED
  *  - NEW: requestReturn(EquipmentCondition) (borrower return notice, only while RELEASED)
  *  - NEW getters: getDateBorrowed(), getDateReturned(), isReturnRequested(), getDeclaredReturnCondition()
- * Search for "NEW:" and "CHANGED:" to find each change.
  */
 public class BorrowRequest {
     private String requestID;
