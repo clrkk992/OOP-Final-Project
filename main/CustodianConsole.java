@@ -560,12 +560,21 @@ public class CustodianConsole extends Console {
             System.out.println("[0] Return to Dashboard");
             System.out.print("Enter your choice: ");
             switch (readInt(0, 3)) {
-                case 1: showMessage(inventorySystem.generateSummaryReport()); pause(); break;
+                case 1: generateSummaryReport(); pause(); break;
                 case 2: printEquipmentAvailabilitySummary(); break;
                 case 3: printBorrowingRequestSummary(); break;
                 case 0: back = true; break;
             }
         }
+    }
+
+    private void generateSummaryReport() {
+        showHeader("INVENTORY SUMMARY");
+        showField("Total Borrowers", inventorySystem.getBorrowers().size());
+        showField("Total Custodians", inventorySystem.getCustodians().size());
+        showField("Total Equipment", inventorySystem.getEquipmentList().size());
+        showField("Total Borrow Requests", getAllRequests().size());
+        showField("Total Damage Reports", inventorySystem.getDamageReports().size());
     }
 
     private void printEquipmentAvailabilitySummary() {
@@ -577,7 +586,9 @@ public class CustodianConsole extends Console {
             else unavailable++;
         }
 
-        showHeader("EQUIPMENT AVAILABILITY SUMMARY");
+        System.out.println("\n========================================");
+        System.out.println("     EQUIPMENT AVAILABILITY SUMMARY");
+        System.out.println("========================================");
         showField("Total Equipment", equipment.size());
         showField("Available", available);
         showField("Borrowed", borrowed);
@@ -600,7 +611,9 @@ public class CustodianConsole extends Console {
             }
         }
 
-        showHeader("BORROWING REQUEST SUMMARY");
+        System.out.println("\n========================================");
+        System.out.println("        BORROWING REQUEST SUMMARY");
+        System.out.println("========================================");
         showField("Total Requests", requests.size());
         showField("Pending", pending);
         showField("Approved", approved);

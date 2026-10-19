@@ -200,8 +200,8 @@ public class BorrowerConsole extends Console {
         if (requests.isEmpty()) {
             showMessage("You have no borrow requests yet.");
         } else {
-            printRequestList(requests);
-            requestDetailLoop();
+            BorrowRequest request = borrower.findBorrowRequest(readLine());
+            printRequestDetails(request);
         }
         pause();
     }
@@ -257,7 +257,8 @@ public class BorrowerConsole extends Console {
         } else {
             printRequestList(history);
             showField("Total Records", String.valueOf(history.size()));
-            requestDetailLoop();
+            BorrowRequest request = borrower.findBorrowRequest(readLine());
+            printRequestDetails(request);
         }
         pause();
     }
@@ -288,31 +289,12 @@ public class BorrowerConsole extends Console {
         showField("Total Requests", String.valueOf(requests.size()));
     }
 
-    // Allows the borrower to inspect an individual request.
-    private void requestDetailLoop() {
-        while (true) {
-            showMessage("[1] View Request Details");
-            showMessage("[0] Back");
-            System.out.print("Enter your choice: ");
-            if (readInt(0, 1) == 0) return;
-            System.out.print("Enter Borrow Request ID: ");
-            BorrowRequest request = borrower.findBorrowRequest(readLine());
-            if (request == null) {
-                showMessage("Borrow request not found.");
-            } else {
-                printRequestDetails(request);
-            }
-            pause();
-        }
-    }
-
     // Displays the complete details of a borrowing request.
     private void printRequestDetails(BorrowRequest request) {
         showHeader("BORROW REQUEST DETAILS");
         showField("Request ID", request.getRequestID());
-        showMessage("Equipment:");
         for (Equipment equipment : request.getEquipmentList()) {
-            showField(equipment.getEquipmentID(), equipment.getName());
+            showField("Equipment", equipment.getName());
         }
         showField("Purpose", request.getPurpose());
         showField("Date Requested", request.getDateRequested());
@@ -338,7 +320,7 @@ public class BorrowerConsole extends Console {
             return;
         }
         for (Equipment equipment : requestItems) {
-            showField(equipment.getEquipmentID(), equipment.getName());
+            showField("Equipment", equipment.getName());
         }
         showField("Item Count", String.valueOf(requestItems.size()));
         showSeparator();

@@ -355,7 +355,7 @@ public abstract class Console {
     }
 
     protected void showField(String label, Object value) {
-        System.out.printf("%-20s: %s%n", label, value);
+        System.out.printf("%-25s: %s%n", label, value);
     }
 
     protected void showMessage(String message) {

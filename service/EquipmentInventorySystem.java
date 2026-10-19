@@ -193,6 +193,8 @@ public class EquipmentInventorySystem {
 
     public ArrayList<ReturnRecord> getReturnRecords() { return new ArrayList<>(returnRecords); }
     public ArrayList<DamageReport> getDamageReports() { return new ArrayList<>(damageReports); }
+    public ArrayList<Borrower> getBorrowers() { return new ArrayList<>(borrowers); }
+    public ArrayList<Custodian> getCustodians() { return new ArrayList<>(custodians); }
 
     // SEARCH BORROW REQUEST BY ID
     public BorrowRequest searchRequest(String requestID) {
@@ -258,19 +260,5 @@ public class EquipmentInventorySystem {
 
         returnRecords.add(record);
         return true;
-    }
-
-    // Generate the inventory summary
-    public String generateSummaryReport() {
-        StringBuilder report = new StringBuilder();
-
-        report.append("===== INVENTORY SUMMARY =====\n");
-        report.append("Total Borrowers: ").append(borrowers.size()).append("\n");
-        report.append("Total Custodians: ").append(custodians.size()).append("\n");
-        report.append("Total Equipment: ").append(equipmentList.size()).append("\n");
-        report.append("Total Borrow Requests: ").append(requests.size()).append("\n");
-        report.append("Total Damage Reports: ").append(damageReports.size()).append("\n");
-
-        return report.toString(); // returns the formatted string to be printed by the console class
     }
 }
