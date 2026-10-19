@@ -16,7 +16,6 @@ import service.EquipmentInventorySystem;
  *  - NEW: viewReturnedHistory()
  *  - NEW: viewReturnableRequests()
  *  - NEW: returnEquipment(requestID, declaredCondition)
- * Search for "NEW:" and "CHANGED:" to find each change.
  */
 public class Borrower extends User {
     private String department;
