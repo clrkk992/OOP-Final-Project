@@ -1,8 +1,8 @@
 package service;
 
-import java.util.ArrayList;
 import entities.*;
 import enums.*;
+import java.util.ArrayList;
 
 /*
  * ===== CHANGES MADE IN THIS FILE =====
@@ -201,8 +201,7 @@ public class EquipmentInventorySystem {
         }
 
         for (BorrowRequest request : requests) {
-            if (request != null
-                    && requestID.equals(request.getRequestID())) {
+            if (request != null && requestID.equalsIgnoreCase(request.getRequestID())) { //added equalsIgnoreCase
                 return request;
             }
         }

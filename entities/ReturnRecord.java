@@ -2,6 +2,7 @@ package entities;
 
 import enums.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter; //added import for flagLateReturn
 
 public class ReturnRecord {
 
@@ -51,7 +52,10 @@ public class ReturnRecord {
     public boolean flagLateReturn() {
         try {
             LocalDate returnedDate = LocalDate.parse(dateReturned);
-            LocalDate dueDate = LocalDate.parse(borrowRequest.getRequestReturnDate());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+            LocalDate dueDate = LocalDate.parse(borrowRequest.getRequestReturnDate(), formatter);
+            //changed from LocalDate dueDate = LocalDate.parse(borrowRequest.getRequestReturnDate()); because it expects different format
+            // expects yy/mm/dd instead of mm/dd/yy from borrower
 
             return returnedDate.isAfter(dueDate);
 

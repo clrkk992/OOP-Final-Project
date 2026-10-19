@@ -1,10 +1,10 @@
 
 package main;
 
-import java.util.ArrayList;
-import java.util.Scanner;
 import entities.*;
 import enums.*;
+import java.util.ArrayList;
+import java.util.Scanner;
 import service.EquipmentInventorySystem;
 
 public class CustodianConsole extends Console {

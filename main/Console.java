@@ -1,10 +1,9 @@
 package main;
 
-import java.util.Scanner;
-
 import entities.Borrower;
 import entities.Custodian;
 import entities.User;
+import java.util.Scanner;
 import service.EquipmentInventorySystem;
 
 /*
@@ -123,26 +122,102 @@ public abstract class Console {
             return;
         }
 
-        System.out.print("Enter Full Name: ");
-        String name = scanner.nextLine().trim();
+        //Changed: added validation loop each
+        String name;
+            while (true) {
+                System.out.print("Enter Full Name: ");
+                name = scanner.nextLine().trim();
 
-        System.out.print("Enter Contact Number: ");
-        String contactNumber = scanner.nextLine().trim();
+                if (name.isBlank()) {
+                    System.out.println("Name cannot be blank.");
+                    continue;
+                }
 
-        System.out.print("Enter Email: ");
-        String email = scanner.nextLine().trim();
+                break;
+            }
+    
+        String contactNumber;
+        while (true) {
+            System.out.print("Enter Contact Number: ");
+            contactNumber = scanner.nextLine().trim();
 
-        if (inventorySystem.emailExists(email)) {
-            System.out.println("Registration failed: Email is already registered in the system.");
-            return;
+            if (contactNumber.isBlank()) {
+                System.out.println("Contact number cannot be blank.");
+                continue;
+            }
+
+            if (!contactNumber.matches("\\d+")) {
+                System.out.println("Contact number must contain digits only.");
+                continue;
+            }
+
+            if (contactNumber.length() < 11) {
+                System.out.println("Contact number must be at least 11 digits.");
+                continue;
+            }
+
+            break;
         }
 
-        System.out.print("Enter Password: ");
-        String password = scanner.nextLine().trim();
+        String email;
+        while (true) {
+            System.out.print("Enter Email: ");
+            email = scanner.nextLine().trim();
+            
+            if (email.isBlank()) {
+            System.out.println("Email cannot be blank.");
+            continue;
+            }
+            
+            if (!email.contains("@")) {
+            System.out.println("Email must contain '@'.");
+            continue;
+            }
+            
+            if (!email.endsWith(".com")) {
+            System.out.println("Email must end with '.com'.");
+            continue;
+            }
+            
+            if (inventorySystem.emailExists(email)) {
+            System.out.println("Registration failed: Email is already registered in the system.");
+            return;
+            }
+
+            break;
+        }
+
+        String password;
+        while (true) {
+            System.out.print("Enter Password: ");
+            password = scanner.nextLine().trim();
+
+            if (password.isBlank()) {
+                System.out.println("Password cannot be blank.");
+                continue;
+            }
+
+            if (password.length() < 4) {
+                System.out.println("Password must be at least 4 characters.");
+                continue;
+            }
+
+            break;
+        }
 
         if (roleChoice == 1) {
-            System.out.print("Enter Department: ");
-            String department = scanner.nextLine().trim();
+            String department;
+            while (true) {
+                System.out.print("Enter Department: ");
+                department = scanner.nextLine().trim();
+
+                if (department.isBlank()) {
+                    System.out.println("Department cannot be blank.");
+                    continue;
+                }
+
+                break;
+            }
 
             Borrower newBorrower = new Borrower(name, contactNumber, email, password, department);
             if (inventorySystem.registerBorrower(newBorrower)) {
@@ -151,8 +226,18 @@ public abstract class Console {
                 System.out.println("Failed to register borrower.");
             }
         } else {
-            System.out.print("Enter Assigned Storage Area: ");
-            String storageArea = scanner.nextLine().trim();
+            String storageArea;
+            while (true) {
+                System.out.print("Enter Assigned Storage Area: ");
+                storageArea = scanner.nextLine().trim();
+
+                if (storageArea.isBlank()) {
+                    System.out.println("Assigned storage area cannot be blank.");
+                    continue;
+                }
+
+                break;
+            }
 
             Custodian newCustodian = new Custodian(name, contactNumber, email, password, storageArea);
             if (inventorySystem.registerCustodian(newCustodian)) {
@@ -275,6 +360,13 @@ public abstract class Console {
 
     protected void showMessage(String message) {
         System.out.println(message);
+    }
+
+    protected void showOptions(String... options) {
+        for (int i = 0; i < options.length; i++) {
+            System.out.printf("[%d] %s%n", i + 1, options[i]);
+        }
+        System.out.println("[0] Back");
     }
 
     protected boolean confirmAction(String message) {

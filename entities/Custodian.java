@@ -1,7 +1,7 @@
 package entities;
 
-import java.util.ArrayList;
 import enums.*;
+import java.util.ArrayList;
 import service.EquipmentInventorySystem;
 
 /*
@@ -125,7 +125,7 @@ public class Custodian extends User {
     // Records a return in the inventory system and identifies this custodian as receiver.
     public ReturnRecord receiveReturn(BorrowRequest request, EquipmentCondition conditionAtReturn, EquipmentInventorySystem inventorySystem) {
         if (!checkPermission(Action.RECEIVE_RETURN) || request == null || conditionAtReturn == null || inventorySystem == null 
-                || request.getStatus() != BorrowRequestStatus.RELEASED) {
+                || request.getStatus() != BorrowRequestStatus.RELEASED || !request.isReturnRequested()) { //added || !request.isReturnRequested
             return null;
         }
 

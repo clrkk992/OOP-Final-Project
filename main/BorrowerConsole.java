@@ -196,7 +196,7 @@ public class BorrowerConsole extends Console {
     // Displays all requests submitted by the borrower.
     private void viewMyBorrowRequests() {
         showHeader("MY BORROW REQUESTS");
-        ArrayList<BorrowRequest> requests = borrower.viewBorrowingHistory();
+        ArrayList<BorrowRequest> requests = borrower.viewRequestsByStatus(BorrowRequestStatus.PENDING); //changed from borrower.viewBorrowHistory to show only pending
         if (requests.isEmpty()) {
             showMessage("You have no borrow requests yet.");
         } else {

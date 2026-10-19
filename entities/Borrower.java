@@ -81,7 +81,7 @@ public class Borrower extends User {
         }
 
         for (BorrowRequest request : borrowingHistory) {
-            if (request.getRequestID().equals(requestID)) {
+            if (request.getRequestID().equalsIgnoreCase(requestID)) {// changed to case-insensitive
                 return request.cancel();
             }
         }

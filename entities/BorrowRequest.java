@@ -1,8 +1,8 @@
 package entities;
 
-import java.util.*;
-import java.time.LocalDate;
 import enums.*;
+import java.time.LocalDate;
+import java.util.*;
 
 /*
  * ===== CHANGES MADE IN THIS FILE =====
@@ -141,7 +141,7 @@ public class BorrowRequest {
 
     // NEW: Borrower files a return notice; the custodian still receives the return
     public boolean requestReturn(EquipmentCondition declaredCondition) {
-        if (status != BorrowRequestStatus.RELEASED || declaredCondition == null) {
+        if (status != BorrowRequestStatus.RELEASED || declaredCondition == null || returnRequested) { //add || returnRequested to prevent repeated print notice
             return false;
         }
         this.returnRequested = true;
