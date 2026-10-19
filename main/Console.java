@@ -2,6 +2,11 @@ package main;
 
 import java.util.Scanner;
 
+import entities.Borrower;
+import entities.Custodian;
+import entities.User;
+import service.EquipmentInventorySystem;
+
 /*
  * ===== CHANGES MADE IN THIS FILE =====
  *  - CHANGED: input is now final and passed in through a constructor (it was never set, so the first read crashed)
@@ -9,6 +14,10 @@ import java.util.Scanner;
  *  - NEW: readInt(min, max)
  *  - NEW: pause() for "Press Enter to continue..."
  *  - UNCHANGED: run(), readLine(), and the abstract methods showConsole() / executeChoice()
+ *  - NEW: runSystem() static method that handles the initial login and sign-up menu, and routes to the appropriate console.
+ *  - NEW: handleLogin() and handleSignUp() static methods to handle the login and sign-up flows.
+ *  - NEW: hanldeSignUp() checks for duplicate emails and rejects them.
+ *  - NEW: showHeader(), showSeparator(), showField(), showMessage(), showOptions(), confirmAction() formatting methods for consistent console output across all consoles.
  * Search for "NEW:" and "CHANGED:" to find each change.
  */
 public abstract class Console {
@@ -24,8 +33,135 @@ public abstract class Console {
 
     // Each console supplies its own menu and menu actions.
     protected abstract void showConsole();
-
     protected abstract void executeChoice(int choice);
+
+    //Main static entry point that handles initial startup, user login, and account sign-up.
+    //Routes successful logins to the appropriate role console.
+    public static void runSystem(Scanner scanner, EquipmentInventorySystem inventorySystem) {
+        boolean running = true;
+        System.out.println("==================================================");
+        System.out.println("  EQUIPMENT BORROWING AND ACCOUNTABILITY SYSTEM   ");
+        System.out.println("==================================================");
+
+        while (running) {
+            System.out.println("\n--- MAIN MENU ---");
+            System.out.println("[1] Login");
+            System.out.println("[2] Sign Up (Create Account)");
+            System.out.println("[0] Exit System");
+            System.out.print("Enter choice: ");
+
+            int choice = -1;
+            try {
+                choice = Integer.parseInt(scanner.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number.");
+                continue;
+            }
+
+            if (choice == 0) {
+                running = false;
+                System.out.println("Thank you for using the system. Goodbye!");
+            } else if (choice == 1) {
+                handleLogin(scanner, inventorySystem);
+            } else if (choice == 2) {
+                handleSignUp(scanner, inventorySystem);
+            } else {
+                System.out.println("Invalid choice. Please select 0, 1, or 2.");
+            }
+        }
+    }
+
+    
+    //Handles credential authentication and launches the corresponding role console.
+    private static void handleLogin(Scanner scanner, EquipmentInventorySystem inventorySystem) {
+        System.out.println("\n--- USER LOGIN ---");
+        System.out.print("Enter Email: ");
+        String email = scanner.nextLine().trim();
+
+        System.out.print("Enter Password: ");
+        String password = scanner.nextLine().trim();
+
+        User user = inventorySystem.authenticate(email, password);
+
+        if (user == null) {
+            System.out.println("Authentication failed! Invalid email, password, or account is blocked.");
+            return;
+        }
+
+        System.out.printf("Login successful! Welcome, %s (%s)%n", user.getName(), user.displayRole());
+
+        // Route user to their respective console dashboard
+        if (user instanceof Borrower) {
+            BorrowerConsole borrowerConsole = new BorrowerConsole(scanner, inventorySystem, (Borrower) user);
+            borrowerConsole.run();
+        } else if (user instanceof Custodian) {
+            CustodianConsole custodianConsole = new CustodianConsole(scanner, inventorySystem, (Custodian) user);
+            custodianConsole.run();
+        } else {
+            System.out.println("Error: Unknown user role encountered.");
+        }
+    }
+
+    
+    //Handles registration for new Borrower or Custodian accounts.
+    private static void handleSignUp(Scanner scanner, EquipmentInventorySystem inventorySystem) {
+        System.out.println("\n--- CREATE NEW ACCOUNT ---");
+        System.out.println("[1] Register as Borrower");
+        System.out.println("[2] Register as Custodian");
+        System.out.print("Select role: ");
+
+        int roleChoice = -1;
+        try {
+            roleChoice = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid choice. Registration cancelled.");
+            return;
+        }
+
+        if (roleChoice != 1 && roleChoice != 2) {
+            System.out.println("Invalid role selection.");
+            return;
+        }
+
+        System.out.print("Enter Full Name: ");
+        String name = scanner.nextLine().trim();
+
+        System.out.print("Enter Contact Number: ");
+        String contactNumber = scanner.nextLine().trim();
+
+        System.out.print("Enter Email: ");
+        String email = scanner.nextLine().trim();
+
+        if (inventorySystem.emailExists(email)) {
+            System.out.println("Registration failed: Email is already registered in the system.");
+            return;
+        }
+
+        System.out.print("Enter Password: ");
+        String password = scanner.nextLine().trim();
+
+        if (roleChoice == 1) {
+            System.out.print("Enter Department: ");
+            String department = scanner.nextLine().trim();
+
+            Borrower newBorrower = new Borrower(name, contactNumber, email, password, department);
+            if (inventorySystem.registerBorrower(newBorrower)) {
+                System.out.printf("Borrower account created successfully! Your ID is %s%n", newBorrower.getUserID());
+            } else {
+                System.out.println("Failed to register borrower.");
+            }
+        } else {
+            System.out.print("Enter Assigned Storage Area: ");
+            String storageArea = scanner.nextLine().trim();
+
+            Custodian newCustodian = new Custodian(name, contactNumber, email, password, storageArea);
+            if (inventorySystem.registerCustodian(newCustodian)) {
+                System.out.printf("Custodian account created successfully! Your ID is %s%n", newCustodian.getUserID());
+            } else {
+                System.out.println("Failed to register custodian.");
+            }
+        }
+    }
 
     // Repeats the menu until the console's exit choice (0) is selected.
     public void run() {
@@ -120,5 +256,36 @@ public abstract class Console {
     protected void pause() {
         System.out.print("Press Enter to continue...");
         input.nextLine();
+    }
+
+    // NEW - Formatting methods for consistent console output across all consoles.
+    protected void showHeader(String title) {
+        System.out.println("\n========================================");
+        System.out.println("          " + title);
+        System.out.println("========================================");
+    }
+
+    protected void showSeparator() {
+        System.out.println("----------------------------------------");
+    }
+
+    protected void showField(String label, Object value) {
+        System.out.printf("%-20s: %s%n", label, value);
+    }
+
+    protected void showMessage(String message) {
+        System.out.println(message);
+    }
+
+    protected void showOptions(String... options) {
+        for (int i = 0; i < options.length; i++) {
+            System.out.printf("[%d] %s%n", i + 1, options[i]);
+        }
+        System.out.println("[0] Back");
+    }
+
+    protected boolean confirmAction(String message) {
+        System.out.print(message + " [Y/N]: ");
+        return confirmation();
     }
 }
