@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import enums.*;
 import service.EquipmentInventorySystem;
 
+/*
+ * ===== CHANGES MADE IN THIS FILE =====
+ *  - CHANGED: receiveReturn() now applies the checked condition to the returned equipment and calls request.markReturned() after the record is saved (before, it only saved the record)
+ * Search for "NEW:" and "CHANGED:" to find each change.
+ */
 public class Custodian extends User {
 
     private String assignedStorageArea;
@@ -127,10 +132,20 @@ public class Custodian extends User {
 
         ReturnRecord record = new ReturnRecord(request, this, conditionAtReturn);
         // Suppose to record each received returns
-        if (inventorySystem.recordReturn(record)) {
-            return record;
+        if (!inventorySystem.recordReturn(record)) {
+            return null;
         }
-        return null;
+
+        // CHANGED: Apply the checked condition to the returned equipment, then close the request
+        // (before, receiveReturn() only saved the record, so the request never became RETURNED)
+        for (Equipment equipment : request.getEquipmentList()) {
+            if (equipment != null) {
+                equipment.updateCondition(conditionAtReturn);
+            }
+        }
+        request.markReturned();
+
+        return record;
     }
 
     // Resolves the matching damage report if this custodian has permission.

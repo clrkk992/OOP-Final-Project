@@ -4,6 +4,15 @@ import java.util.*;
 import java.time.LocalDate;
 import enums.*;
 
+/*
+ * ===== CHANGES MADE IN THIS FILE =====
+ *  - NEW fields: dateBorrowed, dateReturned, returnRequested, declaredReturnCondition
+ *  - CHANGED: release() now records dateBorrowed
+ *  - CHANGED: markReturned() now records dateReturned and returns false if the status did not become RETURNED
+ *  - NEW: requestReturn(EquipmentCondition) (borrower return notice, only while RELEASED)
+ *  - NEW getters: getDateBorrowed(), getDateReturned(), isReturnRequested(), getDeclaredReturnCondition()
+ * Search for "NEW:" and "CHANGED:" to find each change.
+ */
 public class BorrowRequest {
     private String requestID;
     private Borrower borrower;
@@ -13,6 +22,10 @@ public class BorrowRequest {
     private String requestReturnDate;
     private String rejectionReason; // dinagdag ko to para mastore ung paramater sa reject()
     private BorrowRequestStatus status;
+    private String dateBorrowed;   // NEW: set when equipment is released
+    private String dateReturned;   // NEW: set when the return is received
+    private boolean returnRequested; // NEW: borrower filed a return notice
+    private EquipmentCondition declaredReturnCondition; // NEW: condition declared by borrower
 
     private static int nextRequestNumber = 1;
 
@@ -93,6 +106,7 @@ public class BorrowRequest {
         }
 
         status = BorrowRequestStatus.RELEASED;
+        dateBorrowed = LocalDate.now().toString(); // CHANGED: records the borrow date
         return true;
     }
 
@@ -117,9 +131,24 @@ public class BorrowRequest {
         }
 
         updateStatus(BorrowRequestStatus.RETURNED);
-        return status == BorrowRequestStatus.RETURNED;
+        // CHANGED: records the return date, and only returns true when the status really became RETURNED
+        if (status == BorrowRequestStatus.RETURNED) {
+            dateReturned = LocalDate.now().toString();
+            return true;
+        }
+        return false;
     }
 
+
+    // NEW: Borrower files a return notice; the custodian still receives the return
+    public boolean requestReturn(EquipmentCondition declaredCondition) {
+        if (status != BorrowRequestStatus.RELEASED || declaredCondition == null) {
+            return false;
+        }
+        this.returnRequested = true;
+        this.declaredReturnCondition = declaredCondition;
+        return true;
+    }
 
     public boolean validateRequest() {
       return borrower != null
@@ -139,4 +168,9 @@ public class BorrowRequest {
     public BorrowRequestStatus getStatus() { return status; }
     public String getPurpose() { return purpose; }
     public String getRejectionReason() { return rejectionReason; }
+    // NEW getters (borrowing history and return notice)
+    public String getDateBorrowed() { return dateBorrowed; }
+    public String getDateReturned() { return dateReturned; }
+    public boolean isReturnRequested() { return returnRequested; }
+    public EquipmentCondition getDeclaredReturnCondition() { return declaredReturnCondition; }
 }

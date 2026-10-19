@@ -2,6 +2,11 @@ package entities;
 
 import enums.*;
 
+/*
+ * ===== CHANGES MADE IN THIS FILE =====
+ *  - NEW: getLocation() (the details screens show the location)
+ * Search for "NEW:" and "CHANGED:" to find each change.
+ */
 public class Equipment {
     private String equipmentID;
     private String name;
@@ -53,6 +58,7 @@ public class Equipment {
     public String getName() { return name; }
     public EquipmentCategory getCategory() { return category; }
     public String getSerialNumber() { return serialNumber; }
+    public String getLocation() { return location; } // NEW: used by the equipment details screens
     public EquipmentCondition getCondition() { return condition; }
     public AvailabilityStatus getAvailabilityStatus() { return availabilityStatus; }
 

@@ -1,9 +1,23 @@
 package entities;
 
-import enums.Action;
+import enums.*; // CHANGED: was "import enums.Action;"
 import java.util.ArrayList;
 import service.EquipmentInventorySystem;
 
+/*
+ * ===== CHANGES MADE IN THIS FILE =====
+ *  - CHANGED: import enums.Action -> import enums.* (new methods use BorrowRequestStatus and EquipmentCondition)
+ *  - CHANGED: checkPermission() now allows Action.RETURN_EQUIPMENT
+ *  - NEW: viewAvailableEquipment(system)
+ *  - NEW: searchEquipment(keyword, system)
+ *  - NEW: viewEquipmentDetails(equipmentID, system)
+ *  - NEW: findBorrowRequest(requestID)
+ *  - NEW: viewRequestsByStatus(status)
+ *  - NEW: viewReturnedHistory()
+ *  - NEW: viewReturnableRequests()
+ *  - NEW: returnEquipment(requestID, declaredCondition)
+ * Search for "NEW:" and "CHANGED:" to find each change.
+ */
 public class Borrower extends User {
     private String department;
     private ArrayList<BorrowRequest> borrowingHistory;
@@ -32,7 +46,8 @@ public class Borrower extends User {
         return action == Action.SUBMIT_REQUEST
                 || action == Action.CANCEL_REQUEST
                 || action == Action.VIEW_HISTORY
-                || action == Action.VIEW_EQUIPMENTS;
+                || action == Action.VIEW_EQUIPMENTS
+                || action == Action.RETURN_EQUIPMENT; // NEW permission
     }
 
     // GETTERS
@@ -88,6 +103,86 @@ public class Borrower extends User {
             return new ArrayList<>();
         }
         return inventorySystem.getEquipmentList();
+    }
+
+    // NEW: Returns only the equipment that can be borrowed right now.
+    public ArrayList<Equipment> viewAvailableEquipment(EquipmentInventorySystem inventorySystem) {
+        if (!checkPermission(Action.VIEW_EQUIPMENTS) || inventorySystem == null) {
+            return new ArrayList<>();
+        }
+        return inventorySystem.getAvailableEquipment();
+    }
+
+    // NEW: Searches equipment by keyword (equipment ID or name).
+    public ArrayList<Equipment> searchEquipment(String keyword, EquipmentInventorySystem inventorySystem) {
+        if (!checkPermission(Action.VIEW_EQUIPMENTS) || inventorySystem == null) {
+            return new ArrayList<>();
+        }
+        return inventorySystem.searchEquipment(keyword);
+    }
+
+    // NEW: Returns the details of one equipment by ID, or null if not found.
+    public Equipment viewEquipmentDetails(String equipmentID, EquipmentInventorySystem inventorySystem) {
+        if (!checkPermission(Action.VIEW_EQUIPMENTS) || inventorySystem == null) {
+            return null;
+        }
+        return inventorySystem.searchEquipmentByID(equipmentID);
+    }
+
+    // NEW: Finds one request in this borrower's own history by ID.
+    public BorrowRequest findBorrowRequest(String requestID) {
+        if (!checkPermission(Action.VIEW_HISTORY) || requestID == null) {
+            return null;
+        }
+
+        for (BorrowRequest request : borrowingHistory) {
+            if (request.getRequestID().equalsIgnoreCase(requestID.trim())) {
+                return request;
+            }
+        }
+        return null;
+    }
+
+    // NEW: Returns this borrower's requests that match the given status.
+    public ArrayList<BorrowRequest> viewRequestsByStatus(BorrowRequestStatus status) {
+        ArrayList<BorrowRequest> results = new ArrayList<>();
+
+        if (!checkPermission(Action.VIEW_HISTORY) || status == null) {
+            return results;
+        }
+
+        for (BorrowRequest request : borrowingHistory) {
+            if (request.getStatus() == status) {
+                results.add(request);
+            }
+        }
+        return results;
+    }
+
+    // NEW: Returns completed borrows (RETURNED) for the borrowing history screen.
+    public ArrayList<BorrowRequest> viewReturnedHistory() {
+        return viewRequestsByStatus(BorrowRequestStatus.RETURNED);
+    }
+
+    // NEW: Returns requests currently borrowed (RELEASED) that can be returned.
+    public ArrayList<BorrowRequest> viewReturnableRequests() {
+        if (!checkPermission(Action.RETURN_EQUIPMENT)) {
+            return new ArrayList<>();
+        }
+        return viewRequestsByStatus(BorrowRequestStatus.RELEASED);
+    }
+
+    // NEW: Files a return notice with the declared condition. The custodian still receives the return.
+    public boolean returnEquipment(String requestID, EquipmentCondition declaredCondition) {
+        if (!checkPermission(Action.RETURN_EQUIPMENT) || requestID == null || declaredCondition == null) {
+            return false;
+        }
+
+        BorrowRequest request = findBorrowRequest(requestID);
+        if (request == null) {
+            return false;
+        }
+        return request.requestReturn(declaredCondition);
     }
 
     // Returns whether this borrower is currently eligible to borrow equipment.

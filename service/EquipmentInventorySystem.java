@@ -4,6 +4,15 @@ import java.util.ArrayList;
 import entities.*;
 import enums.*;
 
+/*
+ * ===== CHANGES MADE IN THIS FILE =====
+ *  - CHANGED: registerBorrower() and registerCustodian() now return boolean and reject duplicate emails
+ *  - NEW: emailExists(email)
+ *  - NEW: searchEquipmentByID(equipmentID)
+ *  - NEW: getAvailableEquipment()
+ *  - CHANGED: searchEquipment() now matches equipment ID and name only
+ * Search for "NEW:" and "CHANGED:" to find each change.
+ */
 public class EquipmentInventorySystem {
     private ArrayList<Borrower> borrowers;
     private ArrayList<Custodian> custodians;
@@ -24,18 +33,38 @@ public class EquipmentInventorySystem {
         returnRecords = new ArrayList<>();
     }
 
+    // CHANGED: now returns boolean and rejects duplicate emails (was void)
     // Register a borrower
-    public void registerBorrower(Borrower borrower) {
-        if (borrower != null) {
-            borrowers.add(borrower);
+    public boolean registerBorrower(Borrower borrower) {
+        if (borrower == null || emailExists(borrower.getEmail())) {
+            return false;
         }
+        borrowers.add(borrower);
+        return true;
     }
 
+    // CHANGED: now returns boolean and rejects duplicate emails (was void)
     // Register a custodian
-    public void registerCustodian(Custodian custodian) {
-        if (custodian != null) {
-            custodians.add(custodian);
+    public boolean registerCustodian(Custodian custodian) {
+        if (custodian == null || emailExists(custodian.getEmail())) {
+            return false;
         }
+        custodians.add(custodian);
+        return true;
+    }
+
+    // NEW: Check if an email is already used by any registered user
+    public boolean emailExists(String email) {
+        if (email == null) {
+            return false;
+        }
+        for (Borrower borrower : borrowers) {
+            if (borrower.getEmail().equalsIgnoreCase(email.trim())) { return true; }
+        }
+        for (Custodian custodian : custodians) {
+            if (custodian.getEmail().equalsIgnoreCase(email.trim())) { return true; }
+        }
+        return false;
     }
 
     // Add equipment to the inventory
@@ -62,7 +91,8 @@ public class EquipmentInventorySystem {
         }
     }
 
-    // Search equipment by keyword
+    // CHANGED: now matches equipment ID and name only (before: also category and serial number)
+    // Search equipment by keyword (matches ID or name only)
     public ArrayList<Equipment> searchEquipment(String keyword) {
         ArrayList<Equipment> results = new ArrayList<>();
 
@@ -74,12 +104,36 @@ public class EquipmentInventorySystem {
 
         for (Equipment equipment : equipmentList) {
             if (equipment.getEquipmentID().toLowerCase().contains(keyword)
-                    || equipment.getName().toLowerCase().contains(keyword)
-                    || equipment.getCategory().toString()
-                            .toLowerCase().contains(keyword)
-                    || equipment.getSerialNumber().toLowerCase()
-                            .contains(keyword)) {
+                    || equipment.getName().toLowerCase().contains(keyword)) {
 
+                results.add(equipment);
+            }
+        }
+
+        return results;
+    }
+
+    // NEW: Find one equipment by its ID (active inventory only)
+    public Equipment searchEquipmentByID(String equipmentID) {
+        if (equipmentID == null || equipmentID.trim().isEmpty()) {
+            return null;
+        }
+
+        for (Equipment equipment : equipmentList) {
+            if (equipment.getEquipmentID().equalsIgnoreCase(equipmentID.trim())) {
+                return equipment;
+            }
+        }
+
+        return null;
+    }
+
+    // NEW: Get only the equipment that can be borrowed right now
+    public ArrayList<Equipment> getAvailableEquipment() {
+        ArrayList<Equipment> results = new ArrayList<>();
+
+        for (Equipment equipment : equipmentList) {
+            if (equipment.checkAvailability()) {
                 results.add(equipment);
             }
         }
