@@ -3,7 +3,6 @@ package enums;
 /*
  * ===== CHANGES MADE IN THIS FILE =====
  *  - NEW: RETURN_EQUIPMENT (borrower files a return notice)
- * Search for "NEW:" and "CHANGED:" to find each change.
  */
 public enum Action {
     SUBMIT_REQUEST,
