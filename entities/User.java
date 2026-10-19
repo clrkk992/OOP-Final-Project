@@ -10,8 +10,11 @@ public abstract class User {
     private String password;
     private boolean blocked;
 
-    protected User(String userID, String name, String contactNumber, String email, String password) {
-        this.userID = userID;
+    private static int nextIDNumber = 1;
+
+    // Constructor
+    User(String name, String contactNumber, String email, String password) {
+        this.userID = String.format("US%02d", nextIDNumber++);
         this.name = name;
         this.contactNumber = contactNumber;
         this.email = email;
@@ -19,23 +22,22 @@ public abstract class User {
         this.blocked = false;
     }
 
-    //Getters
-    public String getUserID() { return userID; }
+    // GETTERS
+    public String getUserID() { return userID; }  
     public String getName() { return name; }
     public String getContactNumber() { return contactNumber; }
     public String getEmail() { return email; }
     public String getPassword() { return password; }
 
-    //Setters
+    //SETTERS
     public void setContactNumber(String contactNumber) { this.contactNumber = contactNumber; }
     public void setEmail(String email) { this.email = email; }
     public void setPassword(String password) { this.password = password; }
+
+    public boolean isBlocked() { return blocked; }
     public void setBlocked(boolean blocked) { this.blocked = blocked; }
 
-    //Check if blocked
-    public boolean isBlocked() { return blocked; }
-
-    //Abstract Methods
+    //ABSTRACT METHODS
     public abstract String displayRole();
     public abstract boolean checkPermission(Action action);
 }

@@ -11,9 +11,11 @@ public class Equipment {
     private AvailabilityStatus availabilityStatus;
     private String location;
 
+    private static int nextEquipmentNumber = 1;
+
     // Constructor
-    public Equipment(String equipmentID, String name, EquipmentCategory category, String serialNumber, EquipmentCondition condition, String location) {
-        this.equipmentID = equipmentID;
+    public Equipment(String name, EquipmentCategory category, String serialNumber, EquipmentCondition condition, String location) {
+        this.equipmentID = String.format("EQ%02d", nextEquipmentNumber++);
         this.name = name;
         this.category = category;
         this.serialNumber = serialNumber;
