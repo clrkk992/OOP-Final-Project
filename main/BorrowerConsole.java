@@ -17,7 +17,6 @@ import service.EquipmentInventorySystem;
  *  - CHANGED from your draft: Logout is [0] (Console.run() exits on 0); menu follows the newest Figma frame, which includes Return Equipment
  *  - executeChoice(): cases 1-7 hold the action logic; case 0 logs out
  *  - Helpers at the end of the class: addEquipmentToRequest, finishRequest, printEquipmentTable, equipmentDetailLoop, requestDetailLoop, printEquipmentDetails, printRequestDetails, printCurrentRequest, readReturnDate
- * Search for "NEW:" and "CHANGED:" to find each change.
  */
 public class BorrowerConsole extends Console {
 
