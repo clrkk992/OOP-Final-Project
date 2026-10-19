@@ -10,6 +10,8 @@ public class EquipmentInventorySystem {
     private ArrayList<Equipment> equipmentList;
     private ArrayList<BorrowRequest> requests;
     private ArrayList<DamageReport> damageReports;
+    private ArrayList<Equipment> removedEquipment;
+    private ArrayList<ReturnRecord> returnRecords;
 
     // Constructor
     public EquipmentInventorySystem() {
@@ -18,6 +20,8 @@ public class EquipmentInventorySystem {
         equipmentList = new ArrayList<>();
         requests = new ArrayList<>();
         damageReports = new ArrayList<>();
+        removedEquipment = new ArrayList<>();
+        returnRecords = new ArrayList<>();
     }
 
     // Register a borrower
@@ -36,12 +40,12 @@ public class EquipmentInventorySystem {
 
     // Add equipment to the inventory
     public Equipment addEquipment(Equipment equipment) {
-        if (equipment != null) {
-            equipmentList.add(equipment);
-            return equipment;
+        if (equipment == null || equipmentList.contains(equipment)) {
+            return null;
         }
 
-        return null;
+        equipmentList.add(equipment);
+        return equipment;
     }
 
     // Add a borrow request
@@ -125,24 +129,82 @@ public class EquipmentInventorySystem {
         return null;
     }
 
-    // Get a copy of the equipment inventory
-    public ArrayList<Equipment> getEquipmentList() {
-        return new ArrayList<>(equipmentList);
-    }
+    // GETTERS 
 
-    // Find a borrow request by its ID
-    public BorrowRequest findBorrowRequestByID(String requestID) {
-        if (requestID == null) {
+    // GET ACTIVE EQUIPMENT LIST
+    public ArrayList<Equipment> getEquipmentList() { return new ArrayList<>(equipmentList); }
+
+    // GET REMOVED EQUIPMENT HISTORY
+    public ArrayList<Equipment> getRemovedEquipment() { return new ArrayList<>(removedEquipment); }
+
+    public ArrayList<ReturnRecord> getReturnRecords() { return new ArrayList<>(returnRecords); }
+    public ArrayList<DamageReport> getDamageReports() { return new ArrayList<>(damageReports); }
+
+    // SEARCH BORROW REQUEST BY ID
+    public BorrowRequest searchRequest(String requestID) {
+        if (requestID == null || requestID.trim().isEmpty()) {
             return null;
         }
 
         for (BorrowRequest request : requests) {
-            if (request.getRequestID().equals(requestID)) {
+            if (request != null
+                    && requestID.equals(request.getRequestID())) {
                 return request;
             }
         }
 
         return null;
+    }
+
+    // UPDATE EQUIPMENT DETAILS
+    public boolean updateEquipment(Equipment equipment, String name, EquipmentCategory category, String serialNumber, EquipmentCondition condition, String location) {
+        if (equipment == null
+                || !equipmentList.contains(equipment)
+                || name == null || name.trim().isEmpty()
+                || category == null
+                || serialNumber == null || serialNumber.trim().isEmpty()
+                || condition == null
+                || location == null || location.trim().isEmpty()) {
+            return false;
+        }
+
+        equipment.setName(name.trim());
+        equipment.setCategory(category);
+        equipment.setSerialNumber(serialNumber.trim());
+        equipment.updateCondition(condition);
+        equipment.setLocation(location.trim());
+
+        return true;
+    }
+
+    // REMOVE EQUIPMENT AND SAVE IT IN REMOVAL HISTORY
+    public boolean removeEquipment(Equipment equipment, Custodian custodian) {
+        if (equipment == null || custodian == null
+            || !custodian.checkPermission(Action.REMOVE_EQUIPMENT)
+            || !equipmentList.contains(equipment)
+            || equipment.getAvailabilityStatus()
+                    != AvailabilityStatus.AVAILABLE) {
+            return false;
+        }
+
+        equipment.updateStatus(AvailabilityStatus.UNAVAILABLE);
+
+        if (equipmentList.remove(equipment)) {
+            removedEquipment.add(equipment);
+            return true;
+        }
+
+        return false;
+    }
+
+    // RECORD A RECEIVED RETURN
+    public boolean recordReturn(ReturnRecord record) {
+        if (record == null || returnRecords.contains(record)) {
+            return false;
+        }
+
+        returnRecords.add(record);
+        return true;
     }
 
     // Generate the inventory summary

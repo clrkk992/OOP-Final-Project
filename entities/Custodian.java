@@ -55,7 +55,6 @@ public class Custodian extends User {
         if (!checkPermission(Action.VIEW_REQUESTS) || inventorySystem == null || requestID == null || requestID.trim().isEmpty()) {
             return null;
         }
-
         return inventorySystem.searchRequest(requestID);
     }
 
@@ -74,7 +73,7 @@ public class Custodian extends User {
         if (!checkPermission(Action.UPDATE_EQUIPMENT) || equipment == null || newCondition == null) {
             return false;
         }
-        
+
         equipment.updateCondition(newCondition);
         return true;
     }

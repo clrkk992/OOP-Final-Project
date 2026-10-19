@@ -48,7 +48,7 @@ public class Equipment {
         }
     }
 
-    // Getters
+    // GETTERS
     public String getEquipmentID() { return equipmentID; }
     public String getName() { return name; }
     public EquipmentCategory getCategory() { return category; }
@@ -56,11 +56,9 @@ public class Equipment {
     public EquipmentCondition getCondition() { return condition; }
     public AvailabilityStatus getAvailabilityStatus() { return availabilityStatus; }
 
-    // Setter
-    public void setLocation(String location) {
-        //Checker
-        if (location != null && !location.trim().isEmpty()) {
-            this.location = location;
-        }
-    }
+    // SETTERS
+    public void setName(String name) { this.name = name; }
+    public void setCategory(EquipmentCategory category) { this.category = category; }
+    public void setSerialNumber(String serialNumber) { this.serialNumber = serialNumber; }
+    public void setLocation(String location) { this.location = location; }
 }

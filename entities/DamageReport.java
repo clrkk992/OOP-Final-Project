@@ -1,7 +1,6 @@
 package entities;
 
-import enums.DamageReportStatus;
-import enums.DamageSeverity;
+import enums.*;
 
 public class DamageReport {
     private String reportID;
@@ -12,11 +11,11 @@ public class DamageReport {
     private String actionTaken;
     private DamageReportStatus status;
 
-    private static int nextIDNumber = 1;
+    private static int nextReportNumber = 1;
 
     // Constructor
     public DamageReport(ReturnRecord returnRecord, Borrower borrower, String description, DamageSeverity severity) {
-        this.reportID = String.format("DR%02d", nextIDNumber++);
+        this.reportID = String.format("DR%02d", nextReportNumber++);
         this.returnRecord = returnRecord;
         this.borrower = borrower;
         this.description = description;
@@ -35,7 +34,7 @@ public class DamageReport {
             return false;
         }
 
-        if (/*returnRecord == null || borrower == null ||*/ description == null || description.trim().isEmpty() || severity == null) {
+        if (returnRecord == null || borrower == null || description == null || description.trim().isEmpty() || severity == null) {
             return false;
         }
 
@@ -58,7 +57,7 @@ public class DamageReport {
         return true;
     }
 
-    // Getters
+    // GETTERS
     public String getReportID() { return reportID; }
     public ReturnRecord getReturnRecord() { return returnRecord; }
     public Borrower getBorrower() { return borrower; }
@@ -67,7 +66,7 @@ public class DamageReport {
     public DamageSeverity getSeverity() { return severity; }
     public String getActionTaken() { return actionTaken; }
 
-    // Setters
+    // SETTERS
     public void setDescription(String description) { this.description = description; }
     public void setStatus(DamageReportStatus status) { this.status = status; }
 }

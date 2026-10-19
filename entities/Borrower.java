@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import service.EquipmentInventorySystem;
 
 public class Borrower extends User {
-
     private String department;
     private ArrayList<BorrowRequest> borrowingHistory;
 
@@ -18,7 +17,7 @@ public class Borrower extends User {
         this.borrowingHistory = new ArrayList<>();
     }
 
-    // Overrides
+    // OVERRIDES
     @Override
     public String displayRole() {
         return "Borrower";
@@ -40,16 +39,12 @@ public class Borrower extends User {
     public String getDepartment() { return department; }
     public ArrayList<BorrowRequest> getBorrowingHistory() { return new ArrayList<>(borrowingHistory);}
 
-    // SETTERS
-    public void setDepartment(String department) {
-        if (department != null && !department.trim().isEmpty()) {
-            this.department = department.trim();
-        }
-    }
+    // SETTER
+    public void setDepartment(String department) { this.department = department.trim();}
 
     // Creates and records a valid request in both borrower history and the inventory system.
-    public BorrowRequest submitBorrowRequest(ArrayList<Equipment> equipmentList, String purpose, String requestedReturnDate, EquipmentInventorySystem system) {
-        if (system == null || !checkPermission(Action.SUBMIT_REQUEST) || !isEligible()) {
+    public BorrowRequest submitBorrowRequest(ArrayList<Equipment> equipmentList, String purpose, String requestedReturnDate, EquipmentInventorySystem inventorySystem) {
+        if (inventorySystem == null || !checkPermission(Action.SUBMIT_REQUEST) || !isEligible()) {
             return null;
         }
 
@@ -59,7 +54,7 @@ public class Borrower extends User {
             return null;
         }
 
-        system.addBorrowRequest(request);
+        inventorySystem.addBorrowRequest(request);
         borrowingHistory.add(request);
 
         return request;
@@ -88,11 +83,11 @@ public class Borrower extends User {
     }
 
     //NEW! returns list of equipments from service/system
-    public ArrayList<Equipment> viewEquipmentList(EquipmentInventorySystem system) {
-        if (!checkPermission(Action.VIEW_EQUIPMENTS) || system == null) {
+    public ArrayList<Equipment> viewEquipmentList(EquipmentInventorySystem inventorySystem) {
+        if (!checkPermission(Action.VIEW_EQUIPMENTS) || inventorySystem == null) {
             return new ArrayList<>();
         }
-        return system.getEquipmentList();
+        return inventorySystem.getEquipmentList();
     }
 
     // Returns whether this borrower is currently eligible to borrow equipment.

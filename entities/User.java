@@ -10,11 +10,9 @@ public abstract class User {
     private String password;
     private boolean blocked;
 
-    private static int nextIDNumber = 1;
-
     // Constructor
-    User(String name, String contactNumber, String email, String password) {
-        this.userID = String.format("US%02d", nextIDNumber++);
+    User(String userID, String name, String contactNumber, String email, String password) {
+        this.userID = userID;
         this.name = name;
         this.contactNumber = contactNumber;
         this.email = email;

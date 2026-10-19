@@ -14,10 +14,10 @@ public class BorrowRequest {
     private String rejectionReason; // dinagdag ko to para mastore ung paramater sa reject()
     private BorrowRequestStatus status;
 
-    private static int nextIDNumber = 1;
+    private static int nextRequestNumber = 1;
 
     public BorrowRequest(Borrower borrower, ArrayList<Equipment> equipmentList, String purpose, String requestReturnDate) {
-        this.requestID = String.format("BR%02d", nextIDNumber++);
+        this.requestID = String.format("BR%02d", nextRequestNumber++);
         this.borrower = borrower;
         this.equipmentList = equipmentList;
         this.dateRequested = LocalDate.now().toString();
@@ -75,13 +75,15 @@ public class BorrowRequest {
 
     // Release the equipment for borrowing
     public boolean release() {
-        if (status != BorrowRequestStatus.APPROVED || equipmentList == null || equipmentList.isEmpty()) {
+        if (status != BorrowRequestStatus.APPROVED
+                || equipmentList == null
+                || equipmentList.isEmpty()) {
             return false;
         }
 
-        // Check that all equipment can be borrowed first
         for (Equipment equipment : equipmentList) {
-            if (equipment == null || !equipment.checkAvailability()) {
+            if (equipment == null
+                    || !equipment.checkAvailability()) {
                 return false;
             }
         }
@@ -90,8 +92,8 @@ public class BorrowRequest {
             equipment.updateStatus(AvailabilityStatus.BORROWED);
         }
 
-        updateStatus(BorrowRequestStatus.RELEASED);
-        return status == BorrowRequestStatus.RELEASED;
+        status = BorrowRequestStatus.RELEASED;
+        return true;
     }
 
     // Mark the borrowed equipment as returned
