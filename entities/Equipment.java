@@ -5,7 +5,6 @@ import enums.*;
 /*
  * ===== CHANGES MADE IN THIS FILE =====
  *  - NEW: getLocation() (the details screens show the location)
- * Search for "NEW:" and "CHANGED:" to find each change.
  */
 public class Equipment {
     private String equipmentID;
