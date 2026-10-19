@@ -7,7 +7,6 @@ import service.EquipmentInventorySystem;
 /*
  * ===== CHANGES MADE IN THIS FILE =====
  *  - CHANGED: receiveReturn() now applies the checked condition to the returned equipment and calls request.markReturned() after the record is saved (before, it only saved the record)
- * Search for "NEW:" and "CHANGED:" to find each change.
  */
 public class Custodian extends User {
 
