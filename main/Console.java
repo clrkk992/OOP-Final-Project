@@ -277,13 +277,6 @@ public abstract class Console {
         System.out.println(message);
     }
 
-    protected void showOptions(String... options) {
-        for (int i = 0; i < options.length; i++) {
-            System.out.printf("[%d] %s%n", i + 1, options[i]);
-        }
-        System.out.println("[0] Back");
-    }
-
     protected boolean confirmAction(String message) {
         System.out.print(message + " [Y/N]: ");
         return confirmation();

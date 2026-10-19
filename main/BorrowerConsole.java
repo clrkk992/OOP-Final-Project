@@ -74,7 +74,6 @@ public class BorrowerConsole extends Console {
             showMessage("No equipment is available right now.");
         } else {
             printEquipmentList(equipment);
-            equipmentDetailLoop();
         }
         pause();
     }
@@ -88,7 +87,6 @@ public class BorrowerConsole extends Console {
             showMessage("No equipment found.");
         } else {
             printEquipmentList(results);
-            equipmentDetailLoop();
         }
         pause();
     }
@@ -288,37 +286,6 @@ public class BorrowerConsole extends Console {
         }
         showSeparator();
         showField("Total Requests", String.valueOf(requests.size()));
-    }
-
-    // Allows the borrower to inspect equipment details.
-    private void equipmentDetailLoop() {
-        while (true) {
-            showMessage("[1] View Equipment Details");
-            showMessage("[0] Back");
-            System.out.print("Enter your choice: ");
-            if (readInt(0, 1) == 0) return;
-            System.out.print("Enter Equipment ID: ");
-            Equipment equipment = borrower.viewEquipmentDetails(readLine(), inventorySystem);
-            if (equipment == null) {
-                showMessage("Equipment not found.");
-            } else {
-                printEquipmentDetails(equipment);
-            }
-            pause();
-        }
-    }
-
-    // Displays all details of one equipment item.
-    private void printEquipmentDetails(Equipment equipment) {
-        showHeader("EQUIPMENT DETAILS");
-        showField("Equipment ID", equipment.getEquipmentID());
-        showField("Name", equipment.getName());
-        showField("Category", equipment.getCategory().toString());
-        showField("Serial Number", equipment.getSerialNumber());
-        showField("Condition", equipment.getCondition().toString());
-        showField("Location", equipment.getLocation());
-        showField("Availability", equipment.getAvailabilityStatus().toString());
-        showSeparator();
     }
 
     // Allows the borrower to inspect an individual request.
