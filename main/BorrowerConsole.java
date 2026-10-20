@@ -1,14 +1,14 @@
 
 package main;
 
+import entities.*;
+import enums.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.Scanner;
-import entities.*;
-import enums.*;
 import service.EquipmentInventorySystem;
 
 /*
@@ -155,7 +155,7 @@ public class BorrowerConsole extends Console {
         }
         showHeader("REQUEST SUBMITTED");
         showField("Request ID", request.getRequestID());
-        showField("Date Requested", request.getDateRequested());
+        showField("Date Requested", formatDate(request.getDateRequested()));
         showField("Status", request.getStatus().toString());
         pause();
         return true;
@@ -197,10 +197,10 @@ public class BorrowerConsole extends Console {
     private void viewMyBorrowRequests() {
         showHeader("MY BORROW REQUESTS");
         ArrayList<BorrowRequest> requests = borrower.viewRequestsByStatus(BorrowRequestStatus.PENDING); //changed from borrower.viewBorrowHistory to show only pending
-        if (requests.isEmpty()) {
+        BorrowRequest request = borrower.findBorrowRequest(readLine());
+        if (requests.isEmpty() || request == null) {
             showMessage("You have no borrow requests yet.");
         } else {
-            BorrowRequest request = borrower.findBorrowRequest(readLine());
             printRequestDetails(request);
         }
         pause();
@@ -332,6 +332,13 @@ public class BorrowerConsole extends Console {
             if (request.getRequestID().equalsIgnoreCase(requestID)) return request;
         }
         return null;
+    }
+
+    private String formatDate(String date) {
+        if (date == null || date.isEmpty()) return "N/A";
+
+        LocalDate parsedDate = LocalDate.parse(date);
+        return parsedDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
     }
 
     // Validates the expected return date and disallows past dates.

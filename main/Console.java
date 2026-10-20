@@ -135,29 +135,6 @@ public abstract class Console {
 
                 break;
             }
-    
-        String contactNumber;
-        while (true) {
-            System.out.print("Enter Contact Number: ");
-            contactNumber = scanner.nextLine().trim();
-
-            if (contactNumber.isBlank()) {
-                System.out.println("Contact number cannot be blank.");
-                continue;
-            }
-
-            if (!contactNumber.matches("\\d+")) {
-                System.out.println("Contact number must contain digits only.");
-                continue;
-            }
-
-            if (contactNumber.length() < 11) {
-                System.out.println("Contact number must be at least 11 digits.");
-                continue;
-            }
-
-            break;
-        }
 
         String email;
         while (true) {
@@ -206,20 +183,7 @@ public abstract class Console {
         }
 
         if (roleChoice == 1) {
-            String department;
-            while (true) {
-                System.out.print("Enter Department: ");
-                department = scanner.nextLine().trim();
-
-                if (department.isBlank()) {
-                    System.out.println("Department cannot be blank.");
-                    continue;
-                }
-
-                break;
-            }
-
-            Borrower newBorrower = new Borrower(name, contactNumber, email, password, department);
+            Borrower newBorrower = new Borrower(name, email, password);
             if (inventorySystem.registerBorrower(newBorrower)) {
                 System.out.printf("Borrower account created successfully! Your ID is %s%n", newBorrower.getUserID());
             } else {
@@ -239,7 +203,7 @@ public abstract class Console {
                 break;
             }
 
-            Custodian newCustodian = new Custodian(name, contactNumber, email, password, storageArea);
+            Custodian newCustodian = new Custodian(name, email, password, storageArea);
             if (inventorySystem.registerCustodian(newCustodian)) {
                 System.out.printf("Custodian account created successfully! Your ID is %s%n", newCustodian.getUserID());
             } else {

@@ -18,15 +18,13 @@ import service.EquipmentInventorySystem;
  *  - NEW: returnEquipment(requestID, declaredCondition)
  */
 public class Borrower extends User {
-    private String department;
     private ArrayList<BorrowRequest> borrowingHistory;
 
     private static int nextBorrowerNumber = 1;
 
     // Constructor
-    public Borrower(String name, String contactNumber, String email, String password, String department) {
-        super(String.format("BR%02d", nextBorrowerNumber++), name, contactNumber, email, password);
-        this.department = department;
+    public Borrower(String name, String email, String password) {
+        super(String.format("BR%02d", nextBorrowerNumber++), name, email, password);
         this.borrowingHistory = new ArrayList<>();
     }
 
@@ -50,11 +48,7 @@ public class Borrower extends User {
     }
 
     // GETTERS
-    public String getDepartment() { return department; }
     public ArrayList<BorrowRequest> getBorrowingHistory() { return new ArrayList<>(borrowingHistory);}
-
-    // SETTER
-    public void setDepartment(String department) { this.department = department.trim();}
 
     // Creates and records a valid request in both borrower history and the inventory system.
     public BorrowRequest submitBorrowRequest(ArrayList<Equipment> equipmentList, String purpose, String requestedReturnDate, EquipmentInventorySystem inventorySystem) {

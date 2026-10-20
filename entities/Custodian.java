@@ -14,8 +14,8 @@ public class Custodian extends User {
     private static int nextCustodianNumber = 1;
 
     // CONSTRUCTOR
-    public Custodian(String name, String contactNumber, String email, String password, String assignedStorageArea) {
-        super(String.format("CU%02d", nextCustodianNumber++), name, contactNumber, email, password);
+    public Custodian(String name, String email, String password, String assignedStorageArea) {
+        super(String.format("CU%02d", nextCustodianNumber++), name, email, password);
         this.assignedStorageArea = assignedStorageArea;
     }
 
