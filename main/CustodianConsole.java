@@ -327,7 +327,7 @@ public class CustodianConsole extends Console {
     }
 
     private BorrowRequest findReleasedRequest(String id) {
-        ArrayList<BorrowRequest> released = custodian.viewBorrowRequests(BorrowRequestStatus.RELEASED, inventorySystem);
+        ArrayList<BorrowRequest> released = custodian.viewBorrowRequests(BorrowRequestStatus.RETURN_REQUESTED, inventorySystem);
         for (BorrowRequest request : released) {
             if (request.getRequestID().equalsIgnoreCase(id)) return request;
             for (Equipment equipment : request.getEquipmentList()) {
@@ -342,7 +342,7 @@ public class CustodianConsole extends Console {
         System.out.print("Enter Equipment ID or Request ID: ");
         BorrowRequest request = findReleasedRequest(readLine());
         if (request == null) {
-            showMessage("No released request matched that ID.");
+            showMessage("No request with a filed return matched that ID.");
             pause();
             return;
         }
@@ -598,7 +598,7 @@ public class CustodianConsole extends Console {
 
     private void printBorrowingRequestSummary() {
         ArrayList<BorrowRequest> requests = getAllRequests();
-        int pending = 0, approved = 0, rejected = 0, released = 0, returned = 0, cancelled = 0;
+        int pending = 0, approved = 0, rejected = 0, released = 0,  returnRequested = 0, returned = 0, cancelled = 0;
 
         for (BorrowRequest request : requests) {
             switch (request.getStatus()) {
@@ -607,6 +607,7 @@ public class CustodianConsole extends Console {
                 case REJECTED: rejected++; break;
                 case RELEASED: released++; break;
                 case RETURNED: returned++; break;
+                case RETURN_REQUESTED: returnRequested++; break;
                 case CANCELLED: cancelled++; break;
             }
         }
@@ -620,6 +621,7 @@ public class CustodianConsole extends Console {
         showField("Rejected", rejected);
         showField("Released", released);
         showField("Returned", returned);
+        showField("Return Requested", returnRequested);
         showField("Cancelled", cancelled);
         pause();
     }
@@ -675,7 +677,7 @@ public class CustodianConsole extends Console {
         showField("Borrower", request.getBorrower().getName());
         showField("Equipment", getEquipmentNames(request));
         showField("Purpose", request.getPurpose());
-        showField("Date Requested", request.getDateRequested());
+        showField("Date Requested", super.formatDate(request.getDateRequested()));
         showField("Expected Return", request.getRequestReturnDate());
         showField("Status", request.getStatus());
         if (request.getStatus() == BorrowRequestStatus.REJECTED) showField("Rejection Reason", request.getRejectionReason());

@@ -175,6 +175,7 @@ public class Borrower extends User {
         if (request == null) {
             return false;
         }
+        request.updateStatus(BorrowRequestStatus.RETURNED);
         return request.requestReturn(declaredCondition);
     }
 

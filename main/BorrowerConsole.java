@@ -155,7 +155,7 @@ public class BorrowerConsole extends Console {
         }
         showHeader("REQUEST SUBMITTED");
         showField("Request ID", request.getRequestID());
-        showField("Date Requested", formatDate(request.getDateRequested()));
+        showField("Date Requested", super.formatDate(request.getDateRequested()));
         showField("Status", request.getStatus().toString());
         pause();
         return true;
@@ -196,12 +196,36 @@ public class BorrowerConsole extends Console {
     // Displays all requests submitted by the borrower.
     private void viewMyBorrowRequests() {
         showHeader("MY BORROW REQUESTS");
-        ArrayList<BorrowRequest> requests = borrower.viewRequestsByStatus(BorrowRequestStatus.PENDING); //changed from borrower.viewBorrowHistory to show only pending
-        BorrowRequest request = borrower.findBorrowRequest(readLine());
-        if (requests.isEmpty() || request == null) {
+        ArrayList<BorrowRequest> requests = borrower.viewRequestsByStatus(BorrowRequestStatus.PENDING);
+         //changed from borrower.viewBorrowHistory to show only pending
+         int count = 0;
+
+         for(BorrowRequest request : borrower.getBorrowingHistory()) {
+            BorrowRequestStatus status = request.getStatus();
+            if(status != BorrowRequestStatus.PENDING && status != BorrowRequestStatus.REJECTED){
+                continue;
+            }
+            count++;
+            showSeparator();
+            showField("Request ID", request.getRequestID());
+            for (Equipment equipment : request.getEquipmentList()) {
+                showField("Equipment", equipment.getName());
+            }
+            showField("Purpose", request.getPurpose());
+            showField("Date Requested", request.getDateRequested());
+            showField("Expected Return", request.getRequestReturnDate());
+            showField("Status", request.getStatus().toString());
+            if (status == BorrowRequestStatus.REJECTED){
+                showField("Rejection Reason", request.getRejectionReason());
+            }
+            
+        }
+
+        if (count == 0) {
             showMessage("You have no borrow requests yet.");
         } else {
-            printRequestDetails(request);
+            showSeparator();
+            showField("Total Pending", String.valueOf(requests.size()));
         }
         pause();
     }
@@ -332,13 +356,6 @@ public class BorrowerConsole extends Console {
             if (request.getRequestID().equalsIgnoreCase(requestID)) return request;
         }
         return null;
-    }
-
-    private String formatDate(String date) {
-        if (date == null || date.isEmpty()) return "N/A";
-
-        LocalDate parsedDate = LocalDate.parse(date);
-        return parsedDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
     }
 
     // Validates the expected return date and disallows past dates.

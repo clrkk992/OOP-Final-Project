@@ -3,6 +3,8 @@ package main;
 import entities.Borrower;
 import entities.Custodian;
 import entities.User;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 import service.EquipmentInventorySystem;
 
@@ -273,19 +275,26 @@ public abstract class Console {
     }
 
     // CHANGED: reads a whole line and parses it. Reads a finite decimal number and retries invalid input.
-    protected double readDouble() {
-        while (true) {
-            String line = input.nextLine().trim();
-            try {
-                double number = Double.parseDouble(line);
-                if (Double.isFinite(number)) {
-                    return number;
-                }
-            } catch (NumberFormatException e) {
-                // falls through to the retry message
-            }
-            System.out.print("Invalid number, try again: ");
-        }
+    // protected double readDouble() {
+    //     while (true) {
+    //         String line = input.nextLine().trim();
+    //         try {
+    //             double number = Double.parseDouble(line);
+    //             if (Double.isFinite(number)) {
+    //                 return number;
+    //             }
+    //         } catch (NumberFormatException e) {
+    //             // falls through to the retry message
+    //         }
+    //         System.out.print("Invalid number, try again: ");
+    //     }
+    // }
+
+    protected String formatDate(String date) {
+        if (date == null || date.isEmpty()) return "N/A";
+
+        LocalDate parsedDate = LocalDate.parse(date);
+        return parsedDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
     }
 
     // CHANGED: uses nextLine() instead of next(). Reads a Y/N answer and returns true for Y or false for N.

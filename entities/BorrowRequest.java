@@ -51,7 +51,10 @@ public class BorrowRequest {
           case APPROVED:
               if (status == BorrowRequestStatus.RELEASED) { this.status = status; } break;
           case RELEASED:
+              if (status == BorrowRequestStatus.RETURN_REQUESTED) { this.status = status; } break;
+            case RETURN_REQUESTED: 
               if (status == BorrowRequestStatus.RETURNED) { this.status = status; } break;
+    
           default: // No further status changes allowed
               break;
       }
@@ -111,7 +114,7 @@ public class BorrowRequest {
 
     // Mark the borrowed equipment as returned
     public boolean markReturned() {
-        if (status != BorrowRequestStatus.RELEASED) {
+        if (status != BorrowRequestStatus.RETURN_REQUESTED) {
             return false;
         }
 
@@ -146,6 +149,7 @@ public class BorrowRequest {
         }
         this.returnRequested = true;
         this.declaredReturnCondition = declaredCondition;
+        updateStatus(BorrowRequestStatus.RETURN_REQUESTED);
         return true;
     }
 
