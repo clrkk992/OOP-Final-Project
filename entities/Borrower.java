@@ -16,6 +16,8 @@ import service.EquipmentInventorySystem;
  *  - NEW: viewReturnedHistory()
  *  - NEW: viewReturnableRequests()
  *  - NEW: returnEquipment(requestID, declaredCondition)
+ *  - CHANGED: isEligible() is removed
+ *  - NEW: recordBorrowRequest(request) records a borrow request in this borrower's history if it belongs to them. Returns true if successful.
  */
 public class Borrower extends User {
     private ArrayList<BorrowRequest> borrowingHistory;
@@ -36,7 +38,7 @@ public class Borrower extends User {
 
     @Override
     public boolean checkPermission(Action action) {
-        if (isBlocked() || action == null) {
+        if (action == null) {
             return false;
         }
 
@@ -52,7 +54,7 @@ public class Borrower extends User {
 
     // Creates and records a valid request in both borrower history and the inventory system.
     public BorrowRequest submitBorrowRequest(ArrayList<Equipment> equipmentList, String purpose, String requestedReturnDate, EquipmentInventorySystem inventorySystem) {
-        if (inventorySystem == null || !checkPermission(Action.SUBMIT_REQUEST) || !isEligible()) {
+        if (inventorySystem == null || !checkPermission(Action.SUBMIT_REQUEST)) {
             return null;
         }
 
@@ -62,10 +64,23 @@ public class Borrower extends User {
             return null;
         }
 
-        inventorySystem.addBorrowRequest(request);
-        borrowingHistory.add(request);
-
         return request;
+    }
+
+    // NEW: Records a borrow request in this borrower's history if it belongs to them. Returns true if successful.
+    public boolean recordBorrowRequest(BorrowRequest request) {
+        if (request == null || request.getBorrower() != this) {
+            return false;
+        }
+
+        for (BorrowRequest existing : borrowingHistory) {
+            if (existing == request) {
+                return false;
+            }
+        }
+
+        borrowingHistory.add(request);
+        return true;
     }
 
     // Cancels a matching pending request in this borrower's history.
@@ -177,10 +192,5 @@ public class Borrower extends User {
         }
         request.updateStatus(BorrowRequestStatus.RETURNED);
         return request.requestReturn(declaredCondition);
-    }
-
-    // Returns whether this borrower is currently eligible to borrow equipment.
-    public boolean isEligible() {
-        return !isBlocked();
     }
 }

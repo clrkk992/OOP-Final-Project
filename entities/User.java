@@ -1,5 +1,7 @@
 package entities;
 
+//CHANGED: removed isBlocked() and setBlocked() methods, as well as the blocked field.
+
 import enums.Action;
 
 public abstract class User {
@@ -7,15 +9,13 @@ public abstract class User {
     private String name;
     private String email;
     private String password;
-    private boolean blocked;
 
-    // Constructor
-    User(String userID, String name, String email, String password) {
+    // CONSTRUCTOR
+    protected User(String userID, String name, String email, String password) {
         this.userID = userID;
         this.name = name;
         this.email = email;
         this.password = password;
-        this.blocked = false;
     }
 
     // GETTERS
@@ -27,9 +27,6 @@ public abstract class User {
     //SETTERS
     public void setEmail(String email) { this.email = email; }
     public void setPassword(String password) { this.password = password; }
-
-    public boolean isBlocked() { return blocked; }
-    public void setBlocked(boolean blocked) { this.blocked = blocked; }
 
     //ABSTRACT METHODS
     public abstract String displayRole();

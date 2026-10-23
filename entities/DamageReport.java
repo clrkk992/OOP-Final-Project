@@ -2,6 +2,9 @@ package entities;
 
 import enums.*;
 
+/* - CHANGED: resolveReport() now updates the equipment's availability status to available and changes the equipment's condition to the specified condition after repair.
+*  - CHANGED: removed assesSeverity() method since its just the same as getSeverity()
+*/
 public class DamageReport {
     private String reportID;
     private ReturnRecord returnRecord;
@@ -42,17 +45,30 @@ public class DamageReport {
         return true;
     }
 
-    public void assessSeverity() {
-        System.out.println("Damage severity: " + severity);
-    } // baka alisin to redundant lng/same lng sa getSeverity()
-
     // Resolve the damage report
-    public boolean resolveReport(String actionTaken) {
-        if (status == DamageReportStatus.RESOLVED || actionTaken == null || actionTaken.trim().isEmpty()) {
+    public boolean resolveReport(String actionTaken, EquipmentCondition conditionAfterRepair) {
+        if (status != DamageReportStatus.FILED || actionTaken == null || actionTaken.trim().isEmpty() || conditionAfterRepair == null
+                || conditionAfterRepair == EquipmentCondition.DAMAGED
+                || returnRecord == null) {
             return false;
         }
 
-        updateActionTaken(actionTaken);
+        BorrowRequest request = returnRecord.getBorrowRequest();
+        if (request == null || request.getEquipmentList() == null || request.getEquipmentList().isEmpty()) {
+            return false;
+        }
+
+        for (Equipment equipment : request.getEquipmentList()) {
+            if (equipment == null) return false;
+        }
+
+        updateActionTaken(actionTaken.trim());
+
+        for (Equipment equipment : request.getEquipmentList()) {
+            equipment.updateCondition(conditionAfterRepair);
+            equipment.updateStatus(AvailabilityStatus.AVAILABLE);
+        }
+
         setStatus(DamageReportStatus.RESOLVED);
         return true;
     }

@@ -205,7 +205,7 @@ public abstract class Console {
                 break;
             }
 
-            Custodian newCustodian = new Custodian(name, email, password, storageArea);
+            Custodian newCustodian = new Custodian(name, email, password);
             if (inventorySystem.registerCustodian(newCustodian)) {
                 System.out.printf("Custodian account created successfully! Your ID is %s%n", newCustodian.getUserID());
             } else {
@@ -274,22 +274,6 @@ public abstract class Console {
         }
     }
 
-    // CHANGED: reads a whole line and parses it. Reads a finite decimal number and retries invalid input.
-    // protected double readDouble() {
-    //     while (true) {
-    //         String line = input.nextLine().trim();
-    //         try {
-    //             double number = Double.parseDouble(line);
-    //             if (Double.isFinite(number)) {
-    //                 return number;
-    //             }
-    //         } catch (NumberFormatException e) {
-    //             // falls through to the retry message
-    //         }
-    //         System.out.print("Invalid number, try again: ");
-    //     }
-    // }
-
     protected String formatDate(String date) {
         if (date == null || date.isEmpty()) return "N/A";
 
@@ -312,7 +296,7 @@ public abstract class Console {
 
     // NEW: Waits for Enter, for the "Press Enter to continue..." screens.
     protected void pause() {
-        System.out.print("Press Enter to continue...");
+        System.out.print("\nPress Enter to continue...");
         input.nextLine();
     }
 

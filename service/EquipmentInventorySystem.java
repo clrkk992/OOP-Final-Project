@@ -11,6 +11,8 @@ import java.util.ArrayList;
  *  - NEW: searchEquipmentByID(equipmentID)
  *  - NEW: getAvailableEquipment()
  *  - CHANGED: searchEquipment() now matches equipment ID and name only
+ *  - NEW: hasActiveRequestForEquipment(borrower, equipment) (private helper)
+ *  - CHANGED: addBorrowRequest() now checks for active requests for the same equipment and returns false if any are found
  * Search for "NEW:" and "CHANGED:" to find each change.
  */
 public class EquipmentInventorySystem {
@@ -78,10 +80,50 @@ public class EquipmentInventorySystem {
     }
 
     // Add a borrow request
-    public void addBorrowRequest(BorrowRequest request) {
-        if (request != null) {
-            requests.add(request);
+    public boolean addBorrowRequest(BorrowRequest request) {
+        if (request == null || !request.validateRequest()) {
+            return false;
         }
+
+        Borrower borrower = request.getBorrower();
+        ArrayList<Equipment> equipmentList = request.getEquipmentList();
+
+        if (borrower == null || equipmentList == null || equipmentList.isEmpty()) {
+            return false;
+        }
+
+        for (Equipment equipment : equipmentList) {
+            if (equipment == null || hasActiveRequestForEquipment(borrower, equipment)) {
+                return false;
+            }
+        }
+
+        if (!borrower.recordBorrowRequest(request)) {
+            return false;
+        }
+
+        requests.add(request);
+        return true;
+    }
+
+    // Helper method to check if a borrower has an active request for a specific equipment
+    public boolean hasActiveRequestForEquipment(Borrower borrower, Equipment equipment) {
+        for (BorrowRequest request : requests) {
+            if (request.getBorrower() != borrower) continue;
+
+            BorrowRequestStatus status = request.getStatus();
+
+            if (status != BorrowRequestStatus.PENDING && status != BorrowRequestStatus.APPROVED && status != BorrowRequestStatus.RELEASED) {
+                continue;
+            }
+
+            for (Equipment requestedEquipment : request.getEquipmentList()) {
+                if (requestedEquipment != null && requestedEquipment.getEquipmentID().equals(equipment.getEquipmentID())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     // Add a damage report
@@ -166,16 +208,14 @@ public class EquipmentInventorySystem {
 
         for (Borrower borrower : borrowers) {
             if (borrower.getEmail().equalsIgnoreCase(email)
-                    && borrower.getPassword().equals(password)
-                    && !borrower.isBlocked()) {
+                    && borrower.getPassword().equals(password)) {
                 return borrower;
             }
         }
 
         for (Custodian custodian : custodians) {
             if (custodian.getEmail().equalsIgnoreCase(email)
-                    && custodian.getPassword().equals(password)
-                    && !custodian.isBlocked()) {
+                    && custodian.getPassword().equals(password)) {
                 return custodian;
             }
         }
@@ -237,8 +277,7 @@ public class EquipmentInventorySystem {
         if (equipment == null || custodian == null
             || !custodian.checkPermission(Action.REMOVE_EQUIPMENT)
             || !equipmentList.contains(equipment)
-            || equipment.getAvailabilityStatus()
-                    != AvailabilityStatus.AVAILABLE) {
+            || equipment.getAvailabilityStatus() != AvailabilityStatus.AVAILABLE) {
             return false;
         }
 

@@ -7,16 +7,15 @@ import service.EquipmentInventorySystem;
 /*
  * ===== CHANGES MADE IN THIS FILE =====
  *  - CHANGED: receiveReturn() now applies the checked condition to the returned equipment and calls request.markReturned() after the record is saved (before, it only saved the record)
+ *  - NEW: changeEquipmentAvailability(Equipment, AvailabilityStatus) custodian can change availability of equipment if not currently borrowed
+ *  - CHANGED: removed assignedStorageArea since it is only printed in the report and not used in any logic
  */
 public class Custodian extends User {
-
-    private String assignedStorageArea;
     private static int nextCustodianNumber = 1;
 
     // CONSTRUCTOR
-    public Custodian(String name, String email, String password, String assignedStorageArea) {
+    public Custodian(String name, String email, String password) {
         super(String.format("CU%02d", nextCustodianNumber++), name, email, password);
-        this.assignedStorageArea = assignedStorageArea;
     }
 
     // OVERRIDES
@@ -27,7 +26,7 @@ public class Custodian extends User {
 
     @Override
     public boolean checkPermission(Action action) {
-        if (isBlocked() || action == null) {
+        if (action == null) {
             return false;
         }
 
@@ -42,9 +41,6 @@ public class Custodian extends User {
                 || action == Action.VIEW_REQUESTS
                 || action == Action.VIEW_EQUIPMENTS;
     }
-
-    // GETTER / Returns the storage area assigned to this custodian.
-    public String getAssignedStorageArea() { return assignedStorageArea; }
 
     // Returns requests matching the status if this custodian may view requests.
     public ArrayList<BorrowRequest> viewBorrowRequests(BorrowRequestStatus status, EquipmentInventorySystem inventorySystem) {
@@ -88,6 +84,23 @@ public class Custodian extends User {
             return false;
         }
         return inventorySystem.updateEquipment(equipment, name, category, serialNumber, condition, location);
+    }
+
+    //NEW! changes the availability of the equipment if this custodian has permission and the equipment is not currently borrowed
+    public boolean changeEquipmentAvailability(Equipment equipment, AvailabilityStatus newStatus) {
+        if (!checkPermission(Action.UPDATE_EQUIPMENT)
+                || equipment == null
+                || newStatus == null
+                || equipment.getAvailabilityStatus() == AvailabilityStatus.BORROWED) {
+            return false;
+        }
+
+        if (newStatus == AvailabilityStatus.AVAILABLE && equipment.getCondition() == EquipmentCondition.DAMAGED) {
+            return false;
+        }
+
+        equipment.updateStatus(newStatus);
+        return true;
     }
 
     // Removes equipment from active inventory and saves it in removal history. (ito yung snapshot)
@@ -148,14 +161,14 @@ public class Custodian extends User {
     }
 
     // Resolves the matching damage report if this custodian has permission.
-    public boolean resolveDamageReport(String reportID, String actionTaken, EquipmentInventorySystem inventorySystem) {
+    public boolean resolveDamageReport(String reportID, String actionTaken, EquipmentCondition conditionAfterRepair, EquipmentInventorySystem inventorySystem) {
         if (!checkPermission(Action.RESOLVE_DAMAGE) || inventorySystem == null || reportID == null || reportID.trim().isEmpty()) {
             return false;
         }
 
         for (DamageReport report : inventorySystem.getDamageReports()) {
             if (report.getReportID().equals(reportID)) {
-                return report.resolveReport(actionTaken);
+                return report.resolveReport(actionTaken, conditionAfterRepair);
             }
         }
         return false;

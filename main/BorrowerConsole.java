@@ -19,6 +19,8 @@ import service.EquipmentInventorySystem;
  *  - executeChoice(): cases 1-7 hold the action logic; case 0 logs out
  *  - Helpers at the end of the class: addEquipmentToRequest, finishRequest, printEquipmentTable, equipmentDetailLoop, requestDetailLoop, printEquipmentDetails, printRequestDetails, printCurrentRequest, readReturnDate
  *  - NEW: Used the formatting methods from Console.java to display headers, fields, messages, and separators
+ *  - CHANGED: finishRequest() now checks for duplicate equipment in the request and removes them before submitting. It also checks if the borrower has an active request for any of the equipment and removes those items from the request.
+ *  - CHANGED: viewMyBorrowRequests() now shows only pending, approved, and rejected requests. Approved requests are marked with a note that they are awaiting equipment release.
  */
 
 public class BorrowerConsole extends Console {
@@ -134,6 +136,12 @@ public class BorrowerConsole extends Console {
                 return;
             }
         }
+
+        if (inventorySystem.hasActiveRequestForEquipment(borrower, equipment)) {
+            showMessage("You already have a pending or active request for this equipment.");
+            return;
+        }
+
         requestItems.add(equipment);
         showMessage("Equipment added to your request.");
     }
@@ -145,14 +153,26 @@ public class BorrowerConsole extends Console {
         String purpose = readLine();
         String returnDate = readReturnDate();
         if (!confirmAction("Submit this borrow request")) {
-            showMessage("Request submission cancelled.");
+            showMessage("\nRequest submission cancelled.");
             return false;
         }
         BorrowRequest request = borrower.submitBorrowRequest(new ArrayList<>(requestItems), purpose, returnDate, inventorySystem);
         if (request == null) {
-            showMessage("Unable to submit the borrow request.");
+            showMessage("\nRequest failed. Unable to submit the borrow request.");
             return false;
         }
+
+        //extra checker for duplicate equipment in the request
+        if (!inventorySystem.addBorrowRequest(request)) {
+            showMessage("\nRequest failed. You may already have an active request for one or more of the selected equipment.");
+            for (Equipment equipment : new ArrayList<>(requestItems)) {
+                if (inventorySystem.hasActiveRequestForEquipment(borrower, equipment)) {
+                    requestItems.remove(equipment); //removes the equipment from the request if the borrower has an active request for it
+                }
+            }
+            return false;
+        }
+
         showHeader("REQUEST SUBMITTED");
         showField("Request ID", request.getRequestID());
         showField("Date Requested", super.formatDate(request.getDateRequested()));
@@ -202,7 +222,7 @@ public class BorrowerConsole extends Console {
 
          for(BorrowRequest request : borrower.getBorrowingHistory()) {
             BorrowRequestStatus status = request.getStatus();
-            if(status != BorrowRequestStatus.PENDING && status != BorrowRequestStatus.REJECTED){
+            if(status != BorrowRequestStatus.PENDING && status != BorrowRequestStatus.REJECTED && status != BorrowRequestStatus.APPROVED) {
                 continue;
             }
             count++;
@@ -212,11 +232,14 @@ public class BorrowerConsole extends Console {
                 showField("Equipment", equipment.getName());
             }
             showField("Purpose", request.getPurpose());
-            showField("Date Requested", request.getDateRequested());
+            showField("Date Requested", super.formatDate(request.getDateRequested()));
             showField("Expected Return", request.getRequestReturnDate());
             showField("Status", request.getStatus().toString());
             if (status == BorrowRequestStatus.REJECTED){
                 showField("Rejection Reason", request.getRejectionReason());
+            }
+            if (request.getStatus() == BorrowRequestStatus.APPROVED) {
+                System.out.println("\nNote: Approved, awaiting equipment release.");
             }
             
         }
@@ -262,8 +285,8 @@ public class BorrowerConsole extends Console {
         EquipmentCondition condition = conditions[readInt(1, conditions.length) - 1];
         if (confirmAction("Confirm return notice")) {
             if (borrower.returnEquipment(requestID, condition)) {
-                showMessage("Return notice filed successfully. Please hand the equipment to the custodian.");
-                showField("Request ID", requestID);
+                showMessage("\nReturn notice filed successfully. Please hand the equipment to the custodian.");
+                showField("Request ID", requestID.toUpperCase());
                 showField("Declared Condition", condition.toString());
             } else {
                 showMessage("Return notice was not filed.");
@@ -279,10 +302,10 @@ public class BorrowerConsole extends Console {
         if (history.isEmpty()) {
             showMessage("No completed borrows yet.");
         } else {
-            printRequestList(history);
+            for (BorrowRequest request : history) {
+                printRequestDetails(request);
+            }
             showField("Total Records", String.valueOf(history.size()));
-            BorrowRequest request = borrower.findBorrowRequest(readLine());
-            printRequestDetails(request);
         }
         pause();
     }
@@ -306,11 +329,10 @@ public class BorrowerConsole extends Console {
         for (BorrowRequest request : requests) {
             showSeparator();
             showField("Request ID", request.getRequestID());
-            showField("Date Requested", request.getDateRequested());
+            showField("Date Requested", super.formatDate(request.getDateRequested()));
             showField("Status", request.getStatus().toString());
         }
         showSeparator();
-        showField("Total Requests", String.valueOf(requests.size()));
     }
 
     // Displays the complete details of a borrowing request.
@@ -321,17 +343,17 @@ public class BorrowerConsole extends Console {
             showField("Equipment", equipment.getName());
         }
         showField("Purpose", request.getPurpose());
-        showField("Date Requested", request.getDateRequested());
+        showField("Date Requested", super.formatDate(request.getDateRequested()));
         showField("Expected Return", request.getRequestReturnDate());
         showField("Status", request.getStatus().toString());
         if (request.getRejectionReason() != null && !request.getRejectionReason().isBlank()) {
             showField("Rejection Reason", request.getRejectionReason());
         }
         if (request.getDateBorrowed() != null && !request.getDateBorrowed().isBlank()) {
-            showField("Date Borrowed", request.getDateBorrowed());
+            showField("Date Borrowed", super.formatDate(request.getDateBorrowed()));
         }
         if (request.getDateReturned() != null && !request.getDateReturned().isBlank()) {
-            showField("Date Returned", request.getDateReturned());
+            showField("Date Returned", super.formatDate(request.getDateReturned()));
         }
         showSeparator();
     }

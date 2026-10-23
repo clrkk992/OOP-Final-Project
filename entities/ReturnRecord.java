@@ -4,6 +4,8 @@ import enums.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter; //added import for flagLateReturn
 
+// CHANGED: removed generateReturnRecord()
+
 public class ReturnRecord {
 
     private String returnID;
@@ -15,11 +17,8 @@ public class ReturnRecord {
 
     private static int nextReturnID = 1;
 
-    // Constructor
-    public ReturnRecord(BorrowRequest request,
-                        Custodian receivedBy,
-                        EquipmentCondition conditionAtReturn) {
-
+    // CONSTURCTOR
+    public ReturnRecord(BorrowRequest request, Custodian receivedBy, EquipmentCondition conditionAtReturn) {
         this.returnID = String.format("RR%02d", nextReturnID++);
         this.borrowRequest = request;
         this.receivedBy = receivedBy;
@@ -65,55 +64,15 @@ public class ReturnRecord {
     }
 
     // Create a damage report for damaged equipment
-    public DamageReport triggerDamageReport(
-            Borrower borrower,
-            String description,
-            DamageSeverity severity) {
-
-        return new DamageReport(
-                this,
-                borrower,
-                description,
-                severity);
+    public DamageReport triggerDamageReport(Borrower borrower, String description, DamageSeverity severity) {
+        return new DamageReport(this, borrower, description, severity);
     }
 
-    // Generates a printable return record
-    public String generateReturnRecord() {
-        StringBuilder record = new StringBuilder();
-
-        record.append("=== RETURN RECORD ===\n");
-        record.append("Return ID: ").append(getReturnID()).append("\n");
-        record.append("Request ID: ").append(getBorrowRequest().getRequestID()).append("\n");
-        record.append("Date Returned: ").append(getReturnDate()).append("\n");
-        record.append("Equipment Condition: ").append(getConditionAtReturn()).append("\n");
-        record.append("Received By: ").append(getReceivedBy().getName()).append("\n");
-        record.append("Late Status: ").append(isLate()).append("\n");
-
-        return record.toString();
-    }
-
-    // Getters
-    public String getReturnID() {
-        return returnID;
-    }
-
-    public BorrowRequest getBorrowRequest() {
-        return borrowRequest;
-    }
-
-    public String getReturnDate() {
-        return dateReturned;
-    }
-
-    public EquipmentCondition getConditionAtReturn() {
-        return conditionAtReturn;
-    }
-
-    public Custodian getReceivedBy() {
-        return receivedBy;
-    }
-
-    public boolean isLate() {
-        return isLate;
-    }
+    // GETTERS
+    public String getReturnID() { return returnID;}
+    public BorrowRequest getBorrowRequest() { return borrowRequest; }
+    public String getReturnDate() { return dateReturned; }
+    public EquipmentCondition getConditionAtReturn() { return conditionAtReturn; }
+    public Custodian getReceivedBy() { return receivedBy; }
+    public boolean isLate() { return isLate; }
 }

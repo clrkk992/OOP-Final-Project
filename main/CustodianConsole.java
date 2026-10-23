@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import service.EquipmentInventorySystem;
 
+// NEW: changeEquipmentAvailability(Equipment, AvailabilityStatus) custodian can change availability of equipment if not currently borrowed
+
 public class CustodianConsole extends Console {
     private final Custodian custodian;
     private final EquipmentInventorySystem inventorySystem;
@@ -22,7 +24,6 @@ public class CustodianConsole extends Console {
         showHeader("CUSTODIAN DASHBOARD");
         showMessage("Welcome, " + custodian.getName());
         showMessage("Custodian ID: " + custodian.getUserID());
-        showMessage("Storage Area: " + custodian.getAssignedStorageArea());
         System.out.println();
         System.out.println("[1] Equipment Management");
         System.out.println("[2] Borrowing and Returns");
@@ -162,12 +163,14 @@ public class CustodianConsole extends Console {
         }
         printEquipmentDetails(equipment);
         System.out.println("[1] Update Details");
-        System.out.println("[2] Remove Equipment");
+        System.out.println("[2] Change Availability Status");
+        System.out.println("[3] Remove Equipment");
         System.out.println("[0] Back");
         System.out.print("Enter your choice: ");
-        switch (readInt(0, 2)) {
+        switch (readInt(0, 3)) {
             case 1: updateEquipmentDetails(equipment); break;
-            case 2: removeEquipment(equipment); break;
+            case 2: changeEquipmentAvailability(equipment); break;
+            case 3: removeEquipment(equipment); break;
             case 0: break;
         }
     }
@@ -191,6 +194,49 @@ public class CustodianConsole extends Console {
 
         boolean updated = custodian.updateEquipment(equipment, name, category, serial, condition, location, inventorySystem);
         showMessage(updated ? "Equipment updated successfully." : "Failed to update equipment.");
+        pause();
+    }
+
+    private void changeEquipmentAvailability(Equipment equipment) {
+        if (equipment.getAvailabilityStatus() == AvailabilityStatus.BORROWED) {
+            showMessage("\nBorrowed equipment cannot be changed manually. Process its return first.");
+            pause();
+            return;
+        }
+
+        showHeader("CHANGE AVAILABILITY STATUS");
+        showField("Equipment ID", equipment.getEquipmentID());
+        showField("Equipment Name", equipment.getName());
+        showField("Current Status", equipment.getAvailabilityStatus());
+        showSeparator();
+
+        System.out.println("[1] AVAILABLE");
+        System.out.println("[2] UNAVAILABLE");
+        System.out.println("[0] Cancel");
+
+        System.out.print("Enter your choice: ");
+        int choice = readInt(0, 2);
+
+        if (choice == 0) {
+            return;
+        }
+
+        AvailabilityStatus newStatus = (choice == 1) ? AvailabilityStatus.AVAILABLE : AvailabilityStatus.UNAVAILABLE;
+
+        if (newStatus == equipment.getAvailabilityStatus()) {
+            showMessage("Equipment already has this availability status.");
+            pause();
+            return;
+        }
+
+        if (confirmAction("Change availability to " + newStatus)) {
+            if (custodian.changeEquipmentAvailability(equipment, newStatus)) {
+                showMessage("\nEquipment availability updated successfully.");
+                showField("New Status", equipment.getAvailabilityStatus());
+            } else {
+                showMessage("Unable to update availability. Check the equipment condition and your permissions.");
+            }
+        }
         pause();
     }
 
@@ -358,7 +404,7 @@ public class CustodianConsole extends Console {
             severity = selectSeverity("Select Damage Severity:");
         }
 
-        if (!confirmAction("Confirm equipment return?")) {
+        if (!confirmAction("Confirm equipment return")) {
             showMessage("Return cancelled.");
             pause();
             return;
@@ -371,7 +417,7 @@ public class CustodianConsole extends Console {
             return;
         }
 
-        showMessage("Equipment return recorded successfully.");
+        showMessage("\nEquipment return recorded successfully.");
         showField("Return Record ID", record.getReturnID());
         showField("Request ID", request.getRequestID());
         showField("Condition", record.getConditionAtReturn());
@@ -380,7 +426,7 @@ public class CustodianConsole extends Console {
             DamageReport report = record.triggerDamageReport(request.getBorrower(), description, severity);
             if (report != null && report.fileReport()) {
                 inventorySystem.addDamageReport(report);
-                showMessage("Damage report filed successfully.");
+                showMessage("\nDamage report filed successfully.");
                 showField("Report ID", report.getReportID());
             } else showMessage("Warning: Failed to file damage report.");
         }
@@ -400,29 +446,15 @@ public class CustodianConsole extends Console {
             showSeparator();
             showField("Return ID", record.getReturnID());
             showField("Request ID", record.getBorrowRequest().getRequestID());
+            showField("Borrower", record.getBorrowRequest().getBorrower().getName());
             showField("Equipment", getEquipmentNames(record.getBorrowRequest()));
+            showField("Date Returned", super.formatDate(record.getReturnDate()));
             showField("Condition", record.getConditionAtReturn());
+            showField("Received By", record.getReceivedBy().getName());
+            showField("Late Return", record.isLate() ? "Yes" : "No");
         }
         showSeparator();
-
-        while (true) {
-            System.out.println("[1] View Detailed Return Record");
-            System.out.println("[0] Back");
-            System.out.print("Enter your choice: ");
-            if (readInt(0, 1) == 0) return;
-            System.out.print("Enter Return Record ID: ");
-            ReturnRecord found = findReturnRecord(records, readLine());
-            if (found == null) showMessage("Return record not found.");
-            else printReturnDetails(found);
-            pause();
-        }
-    }
-
-    private ReturnRecord findReturnRecord(ArrayList<ReturnRecord> records, String id) {
-        for (ReturnRecord record : records) {
-            if (record.getReturnID().equalsIgnoreCase(id)) return record;
-        }
-        return null;
+        pause();
     }
 
     // DAMAGE REPORTS
@@ -536,8 +568,11 @@ public class CustodianConsole extends Console {
         printReportDetails(report);
         System.out.print("Enter Action Taken: ");
         String actionTaken = readLine();
+        EquipmentCondition conditionAfterRepair = selectCondition("Select Condition After Repair:");
         if (!confirmAction("Resolve this damage report")) showMessage("Resolution cancelled.");
-        else if (custodian.resolveDamageReport(report.getReportID(), actionTaken, inventorySystem)) showMessage("Damage report resolved successfully.");
+        else if (custodian.resolveDamageReport(report.getReportID(), actionTaken, conditionAfterRepair, inventorySystem)) {
+            showMessage("Damage report resolved successfully.");
+        }
         else showMessage("Failed to resolve damage report.");
         pause();
     }
@@ -681,21 +716,7 @@ public class CustodianConsole extends Console {
         showField("Expected Return", request.getRequestReturnDate());
         showField("Status", request.getStatus());
         if (request.getStatus() == BorrowRequestStatus.REJECTED) showField("Rejection Reason", request.getRejectionReason());
-        if (request.getDateReturned() != null) showField("Date Returned", request.getDateReturned());
-        showSeparator();
-    }
-
-    private void printReturnDetails(ReturnRecord record) {
-        BorrowRequest request = record.getBorrowRequest();
-        showHeader("RETURN RECORD");
-        showField("Return ID", record.getReturnID());
-        showField("Request ID", request.getRequestID());
-        showField("Borrower", request.getBorrower().getName());
-        showField("Equipment", getEquipmentNames(request));
-        showField("Date Returned", record.getReturnDate());
-        showField("Condition", record.getConditionAtReturn());
-        showField("Received By", record.getReceivedBy().getName());
-        showField("Late Return", record.isLate() ? "Yes" : "No");
+        if (request.getDateReturned() != null) showField("Date Returned", super.formatDate(request.getDateReturned()));
         showSeparator();
     }
 
