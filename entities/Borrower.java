@@ -53,7 +53,8 @@ public class Borrower extends User {
     public ArrayList<BorrowRequest> getBorrowingHistory() { return new ArrayList<>(borrowingHistory);}
 
     // Creates and records a valid request in both borrower history and the inventory system.
-    public BorrowRequest submitBorrowRequest(ArrayList<Equipment> equipmentList, String purpose, String requestedReturnDate, EquipmentInventorySystem inventorySystem) {
+    public BorrowRequest submitBorrowRequest(ArrayList<Equipment> equipmentList, String purpose,
+                                             String requestedReturnDate, EquipmentInventorySystem inventorySystem) {
         if (inventorySystem == null || !checkPermission(Action.SUBMIT_REQUEST)) {
             return null;
         }
