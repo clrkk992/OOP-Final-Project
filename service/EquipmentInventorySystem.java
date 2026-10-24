@@ -252,7 +252,8 @@ public class EquipmentInventorySystem {
     }
 
     // UPDATE EQUIPMENT DETAILS
-    public boolean updateEquipment(Equipment equipment, String name, EquipmentCategory category, String serialNumber, EquipmentCondition condition, String location) {
+    public boolean updateEquipment(Equipment equipment, String name, EquipmentCategory category,
+                                   String serialNumber, EquipmentCondition condition, String location) {
         if (equipment == null
                 || !equipmentList.contains(equipment)
                 || name == null || name.trim().isEmpty()
