@@ -163,7 +163,8 @@ public class Custodian extends User {
     }
 
     // Resolves the matching damage report if this custodian has permission.
-    public boolean resolveDamageReport(String reportID, String actionTaken, EquipmentCondition conditionAfterRepair, EquipmentInventorySystem inventorySystem) {
+    public boolean resolveDamageReport(String reportID, String actionTaken,
+                                       EquipmentCondition conditionAfterRepair, EquipmentInventorySystem inventorySystem) {
         if (!checkPermission(Action.RESOLVE_DAMAGE) || inventorySystem == null || reportID == null || reportID.trim().isEmpty()) {
             return false;
         }
