@@ -59,7 +59,8 @@ public class Custodian extends User {
     }
 
     // Creates an equipment and returns it for service
-    public Equipment addEquipment(String name, EquipmentCategory category, String serialNumber, EquipmentCondition condition, String location, EquipmentInventorySystem inventorySystem) {
+    public Equipment addEquipment(String name, EquipmentCategory category, String serialNumber,
+                                  EquipmentCondition condition, String location, EquipmentInventorySystem inventorySystem) {
         if (!checkPermission(Action.ADD_EQUIPMENT) || inventorySystem == null) {
             return null;
         }
@@ -79,7 +80,8 @@ public class Custodian extends User {
     }
 
     //NEW! updates equipment details
-    public boolean updateEquipment(Equipment equipment, String name, EquipmentCategory category, String serialNumber, EquipmentCondition condition, String location, EquipmentInventorySystem inventorySystem) {
+    public boolean updateEquipment(Equipment equipment, String name, EquipmentCategory category, String serialNumber,
+                                   EquipmentCondition condition, String location, EquipmentInventorySystem inventorySystem) {
         if (!checkPermission(Action.UPDATE_EQUIPMENT) || equipment == null || inventorySystem == null) {
             return false;
         }
